@@ -1,0 +1,26 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+{{ form(form) }}
+
+    {% if error %}
+        <div class="alert alert-danger mt-3">
+            <p><h3>Error!</h3></p>
+            <p>Check if url is correct.</p>
+            <p>It should be music video..</p>
+            <p>May be this song exist.</p>
+        </div>
+        {% else %}
+            {% if content|length > 1%}
+        <div class="alert alert-success mt-3">
+            <p><h3>Success!</h3></p>
+            <p>This song is not exists yet!</p>
+
+            <p><img src="https://img.youtube.com/vi/{{ content.url }}/hqdefault.jpg" /></p>
+            <p>In few seconds - <b>{{ content.title }}</b> - will be added! :-)</p>
+            <p>This song will be available <a href="{{ url('play_site', {"id" : content.id}) }}">here</a></p>.
+
+        </div>
+            {% endif %}
+    {% endif %}
+{% endblock %}

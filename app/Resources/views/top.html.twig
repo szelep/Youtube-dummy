@@ -1,0 +1,17 @@
+{% extends 'base.html.twig' %}
+{% set first = true %}
+{% block body %}
+    {% for item in list %}
+
+        {% if first %}
+            <div class="alert alert-success">
+                <a href="/{{ item.id }}"><p>{{ item.name | raw }} - {{ item.voteplus }}</p></a>
+            </div>
+                {% set first = false %}
+            {% else %}
+
+             <a href="/{{ item.id }}"><p>{{ item.name | raw }} - {{ item.voteplus }}</p></a>
+        {% endif %}
+
+    {% endfor %}
+{% endblock %}

@@ -1,0 +1,108 @@
+{% extends 'base.html.twig' %}
+{% block title %}{{ list.name }}{% endblock %}
+
+{% set v_plus = random() %}
+{% set v_minus = random() %}
+{% set b_buttons = false %}
+{% if list.id in  app.session.get('votes') %}
+    {% set b_buttons = true %}
+{% endif %}
+
+{% block body %}
+    <style>
+        .n-img{
+            width: 257px;
+            position: relative;
+            cursor: pointer;
+        }
+        .n-img img{
+            width: 100%;
+        }
+        .s-info{
+            position: absolute;
+            right: 2px;
+            background: #ffffffc9;
+            padding: 5px;
+            top: 2px;
+            border: 1px solid #000000d1;
+            color: #000;
+        }
+        .s-info-title{
+            position: absolute;
+            left: 0px;
+            bottom: 31px;
+            font-size: 12px;
+            background: white;
+            padding: 5px;
+            width: 100%;
+            color: #000;
+        }
+        .n-img:hover .s-info{
+            background: white;
+        }
+        .n-img:hover .s-info-title{
+            color: #fff;
+            background: #000;
+        }
+    </style>
+    <script>
+
+        var player;
+        function onYouTubePlayerAPIReady() {
+            player = new YT.Player('player', {
+                width: '640',
+                height: '390',
+                playerVars: {controls: 1, showinfo: 0, autoplay: 1, rel: 0, color: "white"},
+                videoId: '{{ list.url }}',
+                events: {
+                    onReady: onPlayerReady,
+                    onStateChange: onPlayerStateChange
+                }
+            });
+        }
+
+        // autoplay video
+        function onPlayerReady(event) {
+            event.target.playVideo();
+        }
+
+        // when video ends
+        function onPlayerStateChange(event) {
+            if(event.data === 0) {
+                location.href = "{{ url('play_site', {"id" : playlist.next.id}) }}";
+            }
+        }
+
+        $(document).ready(function () {
+
+            $('span[data-vote]').click(function () {
+                if(!$(this).hasClass('disabled')) {
+                    $.post('{{ url('homepage') }}vote/' + $(this).data('vote') + '/{{ list.id }}');
+                    $.get('{{ url('vote', {"set" : "get", "id" : list.id} ) }}', function (data) {
+                        if (data[0] == "success") {
+                            $("#v_" +{{ v_plus }}).text(data[1].votePlus).toggleClass('disabled');
+                            $("#v_" +{{ v_minus }}).text(data[1].voteMinus).toggleClass('disabled');
+                        }
+                    });
+                }
+            })
+
+        })
+    </script>
+
+    <h4>{{ list.name | raw }}</h4>
+    <div class="d-inline-block">
+        <div id="player" style="display: block"></div>
+        <div class="controls-panel mt-2 d-inline-block">
+            <span id="v_{{ v_plus }}" data-vote="up" class="btn btn-success {% if b_buttons %}disabled{% endif %}">{{ list.voteplus }}</span>
+            <span id="v_{{ v_minus }}" data-vote="down" class="btn btn-danger {% if b_buttons %}disabled{% endif %}">{{ list.voteminus }}</span>
+        </div>
+        <div class="d-inline-block text-right"><strong>Views: </strong> {{ list.views }}</div>
+    </div>
+    <div class="d-inline-block align-top">
+        {% if playlist.prev %}<a href=" {{ url('play_site', {"id" : playlist.prev.id}) }}"><div class="d-block mb-1 n-img"><img src="https://img.youtube.com/vi/{{ playlist.prev.url }}/0.jpg" /><span class="s-info">previous</span><span class="s-info-title">{{ playlist.prev.name |raw }}</span></div></a> {% endif %}
+        {% if playlist.next.id != playlist.current %}<a href="{{ url('play_site', {"id" : playlist.next.id})  }}"><div class="d-block mb-1 n-img"><img src="https://img.youtube.com/vi/{{ playlist.next.url }}/0.jpg" /><span class="s-info">next</span><span class="s-info-title">{{ playlist.next.name |raw }}</span></div></a>{% endif %}
+
+    </div>
+
+{% endblock %}
